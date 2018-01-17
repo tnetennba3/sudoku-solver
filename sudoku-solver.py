@@ -53,59 +53,29 @@ def check_grid_valid(grid):
     for square in convert_to_squares(grid):
         check_nine_unique(square, "square")
 
-    print("Sudoku puzzle is valid.")
-
-
-def convert_grid_of_possibilities(grid):
-    grid_of_possibilities = []
-
-    for row in grid:
-        new_row = [[value] if value != 0 else list(set(range(1, 10))) for value in row]
-        grid_of_possibilities.append(new_row)
-
-    return grid_of_possibilities
-
-
-def convert_to_grid(grid_of_possibilities):
-    grid = []
-
-    for row in grid_of_possibilities:
-        new_row = [0 if len(value) > 1 else value[0] for value in row]
-        grid.append(new_row)
-
-    return grid
-
 
 def solve_sudoku(grid, grid_of_possibilities):
 
     columns = convert_to_columns(grid)
     squares = convert_to_squares(grid)
 
-    for row in (range(9)):
+    for row in range(9):
         for column in range(9):
-
-            # remove possibilities by row
-            if len(grid_of_possibilities[row][column]) > 1:
-                grid_of_possibilities[row][column] = list(set(grid_of_possibilities[row][column])
-                                                          - set(grid[row]))
-            # remove possibilities by column
-            if len(grid_of_possibilities[row][column]) > 1:
-                grid_of_possibilities[row][column] = list(set(grid_of_possibilities[row][column])
-                                                          - set(remove_zeros(columns[column])))
-            # remove possibilities by square
             if len(grid_of_possibilities[row][column]) > 1:
                 square_index = math.floor(row / 3) * 3 + math.floor(column / 3)
-                grid_of_possibilities[row][column] = list(set(grid_of_possibilities[row][column])
-                                                          - set(remove_zeros(squares[square_index])))
+                grid_of_possibilities[row][column] = list(
+                    set(grid_of_possibilities[row][column]) -
+                    set(grid[row]) - set(columns[column]) - set(squares[square_index])
+                )
 
-    grid = convert_to_grid(grid_of_possibilities)
-    print_grid(grid)
+            if len(grid_of_possibilities[row][column]) == 1:
+                grid[row][column] = grid_of_possibilities[row][column][0]
 
     return grid, grid_of_possibilities
 
 
-def check_if_incomplete(grid):
-    return 0 in [value for row in grid for value in row]
+def check_if_complete(grid):
+    return 0 not in [value for row in grid for value in row]
 
 
 def print_grid(grid):
@@ -134,24 +104,20 @@ def main():
         [0, 0, 0, 0, 8, 0, 0, 7, 9]
     ]
 
-    start_time = time.time()
-
     check_grid_valid(sudoku_puzzle)
 
-    sudoku_unsolved = True
-    grid_of_possibilities = convert_grid_of_possibilities(sudoku_puzzle)
-    iteration = 1
+    start_time = time.time()
 
-    while sudoku_unsolved:
-        print("iteration", iteration)
+    grid_of_possibilities = [[range(1, 10) if value == 0 else [value] for value in row] for row in sudoku_puzzle]
+
+    for iter in range(100):
         sudoku_puzzle, grid_of_possibilities = solve_sudoku(sudoku_puzzle, grid_of_possibilities)
+        if check_if_complete(sudoku_puzzle):
+            break
+    else:
+        raise Exception("This sudoku puzzle seems unsolvable. Are you sure you inputted the numbers in correctly?")
 
-        sudoku_unsolved = check_if_incomplete(sudoku_puzzle)
-        iteration += 1
-
-        if iteration == 100:
-            raise Exception("This sudoku puzzle seems unsolvable. Are you sure you inputted the numbers in correctly?")
-
-    print("\nSudoku puzzle has been solved. Time taken:", time.time() - start_time, "s")
+    print("sudoku completed in", round(time.time() - start_time, 6), "s")
+    print_grid(sudoku_puzzle)
 
 main()
