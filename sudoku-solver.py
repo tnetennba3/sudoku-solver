@@ -112,12 +112,13 @@ def main():
 
     for iter in range(100):
         sudoku_puzzle, grid_of_possibilities = solve_sudoku(sudoku_puzzle, grid_of_possibilities)
+        print("Iteration", iter, "complete:")
+        print_grid(sudoku_puzzle)
         if check_if_complete(sudoku_puzzle):
             break
     else:
         raise Exception("This sudoku puzzle seems unsolvable. Are you sure you inputted the numbers in correctly?")
 
     print("Sudoku completed in:", round((time.time() - start_time) * 1000, 6), "ms")
-    print_grid(sudoku_puzzle)
 
 main()
