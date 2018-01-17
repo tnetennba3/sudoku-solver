@@ -1,16 +1,5 @@
 import math
 import time
-import pprint as pp
-
-example_sudoku = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
-                  [6, 0, 0, 1, 9, 5, 0, 0, 0],
-                  [0, 9, 8, 0, 0, 0, 0, 6, 0],
-                  [8, 0, 0, 0, 6, 0, 0, 0, 3],
-                  [4, 0, 0, 8, 0, 3, 0, 0, 1],
-                  [7, 0, 0, 0, 2, 0, 0, 0, 6],
-                  [0, 6, 0, 0, 0, 0, 2, 8, 0],
-                  [0, 0, 0, 4, 1, 9, 0, 0, 5],
-                  [0, 0, 0, 0, 8, 0, 0, 7, 9]]
 
 
 def remove_zeros(list_of_values):
@@ -109,22 +98,42 @@ def solve_sudoku(grid, grid_of_possibilities):
                 grid_of_possibilities[row][column] = list(set(grid_of_possibilities[row][column])
                                                           - set(remove_zeros(squares[square_index])))
 
-    new_grid = convert_to_grid(grid_of_possibilities)
-    print("\nNEW GRID:")
-    pp.pprint(new_grid)
+    grid = convert_to_grid(grid_of_possibilities)
+    print_grid(grid)
 
-    return new_grid, grid_of_possibilities
+    return grid, grid_of_possibilities
 
 
 def check_if_incomplete(grid):
-    grid_values = [value for row in grid for value in row]
-    if 0 in grid_values:
-        return True
-    else:
-        return False
+    return 0 in [value for row in grid for value in row]
 
 
-def main(sudoku_puzzle):
+def print_grid(grid):
+    s = ''
+    for row in grid:
+        for value in row:
+            if value == 0:
+                s += ' '
+            else:
+                s += str(value)
+            s += ' '
+        s += '\n'
+    print(s)
+
+
+def main():
+    sudoku_puzzle = [
+        [5, 3, 0, 0, 7, 0, 0, 0, 0],
+        [6, 0, 0, 1, 9, 5, 0, 0, 0],
+        [0, 9, 8, 0, 0, 0, 0, 6, 0],
+        [8, 0, 0, 0, 6, 0, 0, 0, 3],
+        [4, 0, 0, 8, 0, 3, 0, 0, 1],
+        [7, 0, 0, 0, 2, 0, 0, 0, 6],
+        [0, 6, 0, 0, 0, 0, 2, 8, 0],
+        [0, 0, 0, 4, 1, 9, 0, 0, 5],
+        [0, 0, 0, 0, 8, 0, 0, 7, 9]
+    ]
+
     start_time = time.time()
 
     check_grid_valid(sudoku_puzzle)
@@ -134,8 +143,8 @@ def main(sudoku_puzzle):
     iteration = 1
 
     while sudoku_unsolved:
+        print("iteration", iteration)
         sudoku_puzzle, grid_of_possibilities = solve_sudoku(sudoku_puzzle, grid_of_possibilities)
-        print("Iteration", iteration, "complete")
 
         sudoku_unsolved = check_if_incomplete(sudoku_puzzle)
         iteration += 1
@@ -145,5 +154,4 @@ def main(sudoku_puzzle):
 
     print("\nSudoku puzzle has been solved. Time taken:", time.time() - start_time, "s")
 
-
-main(example_sudoku)
+main()
