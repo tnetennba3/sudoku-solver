@@ -117,7 +117,7 @@ def main():
     else:
         raise Exception("This sudoku puzzle seems unsolvable. Are you sure you inputted the numbers in correctly?")
 
-    print("sudoku completed in", round(time.time() - start_time, 6), "s")
+    print("Sudoku completed in:", round((time.time() - start_time) * 1000, 6), "ms")
     print_grid(sudoku_puzzle)
 
 main()
