@@ -125,7 +125,6 @@ def check_if_incomplete(grid):
 
 
 def main(sudoku_puzzle):
-
     start_time = time.time()
 
     check_grid_valid(sudoku_puzzle)
@@ -144,7 +143,7 @@ def main(sudoku_puzzle):
         if iteration == 100:
             raise Exception("This sudoku puzzle seems unsolvable. Are you sure you inputted the numbers in correctly?")
 
-    print("\nSudoku puzzle has been solved. Time taken:", (time.time() - start_time) / 1000, "ms")
+    print("\nSudoku puzzle has been solved. Time taken:", time.time() - start_time, "s")
 
 
 main(example_sudoku)
