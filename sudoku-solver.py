@@ -54,24 +54,20 @@ def check_grid_valid(grid):
         check_nine_unique(square, "square")
 
 
-def solve_sudoku(grid, grid_of_possibilities):
+def solve_sudoku(grid):
 
     columns = convert_to_columns(grid)
     squares = convert_to_squares(grid)
 
     for row in range(9):
         for column in range(9):
-            if len(grid_of_possibilities[row][column]) > 1:
+            if grid[row][column] == 0:
                 square_index = math.floor(row / 3) * 3 + math.floor(column / 3)
-                grid_of_possibilities[row][column] = list(
-                    set(grid_of_possibilities[row][column]) -
-                    set(grid[row]) - set(columns[column]) - set(squares[square_index])
-                )
+                possibilities = set(range(1, 10)) - set(grid[row]) - set(columns[column]) - set(squares[square_index])
+                if len(possibilities) == 1:
+                    grid[row][column] = possibilities.pop()
 
-            if len(grid_of_possibilities[row][column]) == 1:
-                grid[row][column] = grid_of_possibilities[row][column][0]
-
-    return grid, grid_of_possibilities
+    return grid
 
 
 def check_if_complete(grid):
@@ -106,19 +102,17 @@ def main():
 
     check_grid_valid(sudoku_puzzle)
 
-    start_time = time.time()
-
-    grid_of_possibilities = [[range(1, 10) if value == 0 else [value] for value in row] for row in sudoku_puzzle]
-
     for iter in range(100):
-        sudoku_puzzle, grid_of_possibilities = solve_sudoku(sudoku_puzzle, grid_of_possibilities)
-        print("Iteration", iter, "complete:")
-        print_grid(sudoku_puzzle)
+        sudoku_puzzle = solve_sudoku(sudoku_puzzle)
         if check_if_complete(sudoku_puzzle):
             break
     else:
         raise Exception("This sudoku puzzle seems unsolvable. Are you sure you inputted the numbers in correctly?")
 
-    print("Sudoku completed in:", round((time.time() - start_time) * 1000, 6), "ms")
 
-main()
+start_time = time.time()
+
+for i in range(1024):
+    main()
+
+print("Sudoku completed 1024 times in:", round((time.time() - start_time), 6), "s")
