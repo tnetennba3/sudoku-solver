@@ -1,5 +1,6 @@
 import math
 import time
+import collections
 
 
 def remove_zeros(list_of_values):
@@ -13,7 +14,7 @@ def check_nine_unique(list_of_values, list_type):
 
 
 def convert_to_columns(grid):
-    return [[line[i] for line in grid] for i in range(9)]
+    return [set([line[i] for line in grid]) for i in range(9)]
 
 
 def convert_to_squares(grid):
@@ -22,7 +23,7 @@ def convert_to_squares(grid):
         for y in range(3):
             x_values = range(3 * x, 3 * x + 3)
             y_values = range(3 * y, 3 * y + 3)
-            square = [grid[i][j] for i in x_values for j in y_values]
+            square = set([grid[i][j] for i in x_values for j in y_values])
             squares.append(square)
     return squares
 
@@ -54,28 +55,36 @@ def check_grid_valid(grid):
         check_nine_unique(square, "square")
 
 
-def solve_sudoku(grid, grid_of_possibilities):
+def solve_sudoku(grid):
 
     columns = convert_to_columns(grid)
     squares = convert_to_squares(grid)
+    rows = [set([value for value in row]) for row in grid]
 
-    for row in range(9):
-        for column in range(9):
-            if len(grid_of_possibilities[row][column]) > 1:
-                square_index = math.floor(row / 3) * 3 + math.floor(column / 3)
-                grid_of_possibilities[row][column] = list(
-                    set(grid_of_possibilities[row][column]) -
-                    set(grid[row]) - set(columns[column]) - set(squares[square_index])
-                )
+    queue = collections.deque([(x, y) for x in range(9) for y in range(9) if grid[x][y] == 0])
 
-            if len(grid_of_possibilities[row][column]) == 1:
-                grid[row][column] = grid_of_possibilities[row][column][0]
+    iteration = 0
 
-    return grid, grid_of_possibilities
+    while len(queue) > 0:
+        cell = queue.popleft()
+        row, column = cell
+        square_index = math.floor(row / 3) * 3 + math.floor(column / 3)
+        possibilities = set(range(1, 10)) - rows[row] - columns[column] - squares[square_index]
+        if len(possibilities) == 1:
+            new_number = possibilities.pop()
+            rows[row].add(new_number)
+            columns[column].add(new_number)
+            squares[square_index].add(new_number)
+            grid[row][column] = new_number
+        else:
+            queue.append(cell)
+        iteration += 1
+        if iteration == 1000:
+            raise Exception("This sudoku puzzle seems unsolveable. Are you sure you inputted the numbers in correctly?")
 
+    print_grid(grid)
 
-def check_if_complete(grid):
-    return 0 not in [value for row in grid for value in row]
+    return grid
 
 
 def print_grid(grid):
@@ -105,20 +114,9 @@ def main():
     ]
 
     check_grid_valid(sudoku_puzzle)
+    solve_sudoku(sudoku_puzzle)
 
-    start_time = time.time()
 
-    grid_of_possibilities = [[range(1, 10) if value == 0 else [value] for value in row] for row in sudoku_puzzle]
-
-    for iter in range(100):
-        sudoku_puzzle, grid_of_possibilities = solve_sudoku(sudoku_puzzle, grid_of_possibilities)
-        print("Iteration", iter, "complete:")
-        print_grid(sudoku_puzzle)
-        if check_if_complete(sudoku_puzzle):
-            break
-    else:
-        raise Exception("This sudoku puzzle seems unsolvable. Are you sure you inputted the numbers in correctly?")
-
-    print("Sudoku completed in:", round((time.time() - start_time) * 1000, 6), "ms")
-
+start_time = time.time()
 main()
+print("Sudoku completed in", round((time.time() - start_time) * 1000, 6), "ms")
