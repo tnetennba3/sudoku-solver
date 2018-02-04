@@ -59,6 +59,7 @@ def solve_sudoku(grid):
 
     columns = convert_to_columns(grid)
     squares = convert_to_squares(grid)
+    rows = [set([value for value in row]) for row in grid]
 
     queue = collections.deque([(x, y) for x in range(9) for y in range(9) if grid[x][y] == 0])
 
@@ -66,9 +67,10 @@ def solve_sudoku(grid):
         cell = queue.popleft()
         row, column = cell
         square_index = math.floor(row / 3) * 3 + math.floor(column / 3)
-        possibilities = set(range(1, 10)) - set(grid[row]) - columns[column] - squares[square_index]
+        possibilities = set(range(1, 10)) - rows[row] - columns[column] - squares[square_index]
         if len(possibilities) == 1:
             new_number = possibilities.pop()
+            rows[row].add(new_number)
             columns[column].add(new_number)
             squares[square_index].add(new_number)
             grid[row][column] = new_number
