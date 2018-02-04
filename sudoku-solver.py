@@ -63,6 +63,8 @@ def solve_sudoku(grid):
 
     queue = collections.deque([(x, y) for x in range(9) for y in range(9) if grid[x][y] == 0])
 
+    iteration = 0
+
     while len(queue) > 0:
         cell = queue.popleft()
         row, column = cell
@@ -76,12 +78,13 @@ def solve_sudoku(grid):
             grid[row][column] = new_number
         else:
             queue.append(cell)
+        iteration += 1
+        if iteration == 1000:
+            raise Exception("This sudoku puzzle seems unsolveable. Are you sure you inputted the numbers in correctly?")
+
+    print_grid(grid)
 
     return grid
-
-
-def check_if_complete(grid):
-    return 0 not in [value for row in grid for value in row]
 
 
 def print_grid(grid):
@@ -115,8 +118,5 @@ def main():
 
 
 start_time = time.time()
-
-for i in range(1024):
-    main()
-
-print("Sudoku completed 1024 times in:", round((time.time() - start_time), 6), "s")
+main()
+print("Sudoku completed in", round((time.time() - start_time) * 1000, 6), "ms")
