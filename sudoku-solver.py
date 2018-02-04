@@ -1,5 +1,6 @@
 import math
 import time
+import collections
 
 
 def remove_zeros(list_of_values):
@@ -13,7 +14,7 @@ def check_nine_unique(list_of_values, list_type):
 
 
 def convert_to_columns(grid):
-    return [[line[i] for line in grid] for i in range(9)]
+    return [set([line[i] for line in grid]) for i in range(9)]
 
 
 def convert_to_squares(grid):
@@ -22,7 +23,7 @@ def convert_to_squares(grid):
         for y in range(3):
             x_values = range(3 * x, 3 * x + 3)
             y_values = range(3 * y, 3 * y + 3)
-            square = [grid[i][j] for i in x_values for j in y_values]
+            square = set([grid[i][j] for i in x_values for j in y_values])
             squares.append(square)
     return squares
 
@@ -59,13 +60,20 @@ def solve_sudoku(grid):
     columns = convert_to_columns(grid)
     squares = convert_to_squares(grid)
 
-    for row in range(9):
-        for column in range(9):
-            if grid[row][column] == 0:
-                square_index = math.floor(row / 3) * 3 + math.floor(column / 3)
-                possibilities = set(range(1, 10)) - set(grid[row]) - set(columns[column]) - set(squares[square_index])
-                if len(possibilities) == 1:
-                    grid[row][column] = possibilities.pop()
+    queue = collections.deque([(x, y) for x in range(9) for y in range(9) if grid[x][y] == 0])
+
+    while len(queue) > 0:
+        cell = queue.popleft()
+        row, column = cell
+        square_index = math.floor(row / 3) * 3 + math.floor(column / 3)
+        possibilities = set(range(1, 10)) - set(grid[row]) - columns[column] - squares[square_index]
+        if len(possibilities) == 1:
+            new_number = possibilities.pop()
+            columns[column].add(new_number)
+            squares[square_index].add(new_number)
+            grid[row][column] = new_number
+        else:
+            queue.append(cell)
 
     return grid
 
@@ -101,13 +109,7 @@ def main():
     ]
 
     check_grid_valid(sudoku_puzzle)
-
-    for iter in range(100):
-        sudoku_puzzle = solve_sudoku(sudoku_puzzle)
-        if check_if_complete(sudoku_puzzle):
-            break
-    else:
-        raise Exception("This sudoku puzzle seems unsolvable. Are you sure you inputted the numbers in correctly?")
+    solve_sudoku(sudoku_puzzle)
 
 
 start_time = time.time()
